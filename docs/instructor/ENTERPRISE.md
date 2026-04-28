@@ -33,7 +33,7 @@ The end-of-Enterprise state described in this doc — SHA-pinned actions, OIDC t
 
 `enterprise` is branched from `stable`, so the workshop progression is linear: `git diff enterprise..stable` shows exactly what segments 12–15 transform.
 
-**Important caveat:** the SHA-pinning excerpts on the `enterprise` branch use the literal placeholder string `<40-char-sha>` (see the read-only excerpt later in this doc, segment 14, "Action pinning") — they are NOT real 40-character SHAs. The instructor pins real SHAs at workshop date as part of the dry-run, not pre-commit.
+**Important caveat:** the SHA-pinning excerpts in this doc and the `enterprise` branch were last refreshed on 2026-04-27 (see the read-only excerpt later in this doc, segment 14, "Action pinning"). The instructor should re-verify the SHAs are still the latest absolute versions at workshop date as part of the dry-run; if a publisher has shipped a new release in the interim, repin to that release before going live.
 
 For the supporting AWS-side setup that this branch assumes already exists — OIDC provider, IAM role and trust policy, CloudFront distribution with OAC, and the `production` environment configuration — see `README.md` on the `enterprise` branch.
 
@@ -230,7 +230,7 @@ OIDC and CloudFront are landed. The pipeline now authenticates with short-lived 
 
 - A version tag like `actions/checkout@v4` is a Git tag, and Git tags are mutable. The publisher can re-point `v4` to any commit at any time. A compromised publisher account can re-point `v4` to malicious code, and every workflow on the planet that pins to `@v4` re-fetches that code on its next run. This is OWASP CICD-SEC-3 (third-party action integrity).
 - Pinning to a 40-character commit SHA freezes the action at exactly the code we reviewed. The trade-off is that a new release means a manual update — version drift becomes visible because the SHA changes — but that is the security property we want, not a regression.
-- The SHA-comment convention preserves human readability. `actions/checkout@<40-char-sha> # v4.1.7` reads as "checkout pinned to commit <sha>, which was tagged v4.1.7 at the time we pinned it." The comment is not load-bearing for the runner; it is for the next human.
+- The SHA-comment convention preserves human readability. `actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2` reads as "checkout pinned to that commit, which was tagged v6.0.2 at the time we pinned it." The comment is not load-bearing for the runner; it is for the next human.
 - The `permissions:` block at workflow level should be deny-all by default. Each job grants only what it needs. Most jobs need `contents: read` (so checkout can clone). Only the deploy job needs `id-token: write`. Other token capabilities (`pull-requests: write`, `issues: write`, `packages: write`) stay denied because no job in this workflow uses them. This is OWASP CICD-SEC-1 (insufficient identity and access management).
 - Why deny-all and not just unset? An unset `permissions:` block inherits the runner's default token, which historically has been more permissive than necessary. Deny-all is the explicit, audit-friendly state. A reviewer can read the workflow file and answer "what can this workflow do?" without consulting GitHub's defaults table.
 
@@ -239,7 +239,7 @@ OIDC and CloudFront are landed. The pipeline now authenticates with short-lived 
 This segment is mechanical: find each `uses:` and re-pin it. Do not skip the comment.
 
 1. Open `.github/workflows/_build.yml`. Find every `uses:` line.
-2. For each marketplace action, look up its current release on GitHub, find the commit SHA for the release tag, and rewrite the `uses:` line as `<owner>/<action>@<40-char-sha> # <semver-tag>`. The actions to repin in this workshop are listed in the read-only excerpt below.
+2. For each marketplace action, look up its current release on GitHub, find the commit SHA for the release tag, and rewrite the `uses:` line in the form `<owner>/<action>@<full-40-char-commit-sha> # <semver-tag>`. The actions to repin in this workshop are listed in the read-only excerpt below.
 3. Repeat in `.github/workflows/ci.yml`. The same actions appear; they pin to the same SHAs.
 4. Repeat in `.github/workflows/deploy.yml`. Note that `aws-actions/configure-aws-credentials` is a first-party AWS action; pin it the same way for consistency.
 5. Repeat in `.github/actions/build-astro/action.yml` (the composite action from Stable). Internal `uses:` references inside a composite action also pin to SHAs.
@@ -250,19 +250,20 @@ This segment is mechanical: find each `uses:` and re-pin it. Do not skip the com
 ```yaml
 # Action pinning — Enterprise stage, segment 14.
 # Read-only excerpt. The five actions below appear across _build.yml, ci.yml, deploy.yml, and build-astro/action.yml.
-# SHAs shown as placeholders — the instructor looks up real SHAs at workshop time and pastes them in.
+# SHAs below are real, looked up on 2026-04-27 against the latest release of each action.
+# Re-verify these are still current at workshop date and repin if a newer release has shipped.
 # SHA-comment convention source of truth: TDD §5.3.
-- uses: actions/checkout@<40-char-sha> # v4.1.7
-- uses: actions/setup-node@<40-char-sha> # v4.0.3
-- uses: actions/upload-artifact@<40-char-sha> # v4.3.6
-- uses: actions/download-artifact@<40-char-sha> # v4.1.8
-- uses: aws-actions/configure-aws-credentials@<40-char-sha> # v4.0.2
+- uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+- uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+- uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+- uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+- uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
 ```
 
 ```yaml
 # .github/workflows/deploy.yml — Enterprise stage, end of segment 14
 # Read-only excerpt. Workflow-level permissions are deny-all; per-job grants only what is needed.
-# Action pins (`<40-char-sha>`) elided here for readability — see the action-pinning excerpt above.
+# Action pin SHAs elided here for readability — see the action-pinning excerpt above.
 name: Deploy
 on:
   push:
@@ -281,11 +282,11 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/download-artifact@<40-char-sha> # v4.1.8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: dist
           path: dist
-      - uses: aws-actions/configure-aws-credentials@<40-char-sha> # v4.0.2
+      - uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:
           role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
@@ -366,11 +367,11 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/download-artifact@<40-char-sha> # v4.1.8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: dist
           path: dist
-      - uses: aws-actions/configure-aws-credentials@<40-char-sha> # v4.0.2
+      - uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:
           role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
