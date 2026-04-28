@@ -1,7 +1,7 @@
 ---
 project: "fem-cicd-service"
 maturity: "draft"
-last_updated: "2026-04-26"
+last_updated: "2026-04-27"
 updated_by: "@senior-engineer"
 scope: "Stage 1 (POC, 'Make it deploy') instructor guide for the Frontend Masters 'Cloud CI/CD with GitHub Actions' workshop. Covers FEM segments 2–6: from the first commit of deploy.yml through a build+deploy split with artifact handoff, ending with a working pipeline that ships dist/ to S3 on every push to main."
 owner: "@senior-engineer"
@@ -17,6 +17,14 @@ dependencies:
 
 POC stage, FEM segments 2–6. By 12:00, students have a single workflow file (`.github/workflows/deploy.yml`) that builds the sample app and ships `dist/` to an S3 bucket on every push to `main`. Authentication is a long-lived IAM-user access key pasted into GitHub repository secrets. There is no PR gate, no caching, no concurrency control, and no environment approval. This is the "before" picture: a pipeline a student could have shipped in 2014. Stable and Enterprise are the diff.
 
+## Completed reference
+
+The completed end-of-segment-6 state described in this doc — the sample-app files (TDD §4) plus `.github/workflows/deploy.yml` — lives byte-for-byte on the `poc` branch. A senior-engineer or student who wants to see the finished pipeline without walking the segments can check out that branch and run it.
+
+For the AWS prerequisites and GitHub repository settings the instructor configures before this stage runs live, see `README.md` on the `poc` branch.
+
+The YAML excerpt at lines 199–239 of this doc IS the file committed on the `poc` branch (modulo `<example-bucket>` and region placeholders).
+
 ## Pre-flight
 
 The OUTLINE pre-flight checklist (`OUTLINE.md` → "Pre-flight checklist") is the source of truth. The items below are the subset that must be verified before segment 2 starts and are POC-stage-specific:
@@ -25,7 +33,7 @@ The OUTLINE pre-flight checklist (`OUTLINE.md` → "Pre-flight checklist") is th
 - An S3 bucket per the demo convention exists with static website hosting enabled and a public-read bucket policy (TDD §6.3, POC row).
 - An IAM user with programmatic access exists, scoped to `s3:PutObject`, `s3:DeleteObject`, `s3:ListBucket` on the bucket. The access key ID and secret access key are in a paste-buffer the instructor can reach in segment 5 — and rotated to demo-only credentials, because the screenshare recording is permanent (TDD §11.1).
 - GitHub repository secrets are empty. `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are added live during segment 5.
-- The `fallback/poc-final` branch exists with the end-of-segment-6 `deploy.yml` already committed. This is the failover target if a live demo runs over time.
+- The `poc` branch exists with the end-of-segment-6 `deploy.yml` already committed. This is the failover target if a live demo runs over time.
 - The instructor's editor font is at or above 18pt and the GitHub web UI is at 125% zoom or higher (TDD §15.1, also enforced in OUTLINE pre-flight).
 
 If any item above is missing, do not start segment 2. Recover during segment 1's 15-minute Introduction window.
@@ -56,7 +64,7 @@ If any item above is missing, do not start segment 2. Recover during segment 1's
 - **Q: Why does the file have to be in `.github/workflows/`?** Because that is the only directory GitHub Actions reads. A YAML file in any other directory is ignored. This is convention, not configuration.
 - **Q: Can I have more than one workflow file?** Yes. Each file in `.github/workflows/` is a separate, independent workflow. Stable will use two; we use one in POC.
 - **Q: What does `ubuntu-latest` actually mean?** A GitHub-managed Ubuntu virtual machine with a curated toolchain pre-installed. Concrete tooling list is segment 3.
-- **Gotcha (instructor):** YAML indentation errors are the most common cause of "my workflow doesn't run." If the workflow does not appear in the Actions tab at all, suspect indentation before suspecting GitHub. Have a known-good copy in the `fallback/poc-final` branch's history to diff against.
+- **Gotcha (instructor):** YAML indentation errors are the most common cause of "my workflow doesn't run." If the workflow does not appear in the Actions tab at all, suspect indentation before suspecting GitHub. Have a known-good copy in the `poc` branch's history to diff against.
 - **Gotcha (instructor):** Resist explaining `on: push` deeply here. Segment 3 is 15 minutes from now and is dedicated to triggers. If a student asks, say "we will name that next segment" and move on.
 
 ### Transition

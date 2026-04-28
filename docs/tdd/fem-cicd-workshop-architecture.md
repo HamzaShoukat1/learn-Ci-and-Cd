@@ -1,7 +1,7 @@
 ---
 project: "fem-cicd-service"
 maturity: "draft"
-last_updated: "2026-04-26"
+last_updated: "2026-04-27"
 updated_by: "@staff-engineer"
 scope: "Locks the technical architecture, sample-app spec, three-stage CI/CD progression, and instructor-doc conventions for the Frontend Masters 'Cloud CI/CD with GitHub Actions' workshop."
 owner: "@staff-engineer"
@@ -663,11 +663,22 @@ These are concrete bullets the project-manager will turn into Docket issues. Eac
 
 ### 12.6. Negative acceptance (must NOT happen)
 
-- [ ] No `.github/workflows/*.yml` file committed anywhere in the repo.
-- [ ] No `package.json`, `astro.config.mjs`, `tsconfig.json`, or `src/pages/index.astro` file committed.
+This section's bans apply to the `main` (docs) branch only; the implementation branches `poc`/`stable`/`enterprise` have explicit carve-outs in §12.6.2.
+
+#### 12.6.1. On the `main` branch (docs branch)
+
+- [ ] No `.github/workflows/*.yml` file committed.
+- [ ] No `package.json`, `package-lock.json`, `astro.config.mjs`, `tsconfig.json`, or `src/pages/*.astro` file committed.
 - [ ] No Terraform, CloudFormation, CDK, shell scripts, or Dockerfiles committed.
 - [ ] No mention of real AWS account IDs, real S3 bucket names beyond `<example-bucket>`, or real IAM role ARNs beyond `arn:aws:iam::<ACCOUNT_ID>:role/<role-name>`.
 - [ ] No live AWS provisioning steps — every AWS action is described as something the instructor explains via an existing setup or a screenshot.
+
+#### 12.6.2. On implementation branches (`poc`, `stable`, `enterprise`)
+
+- [ ] The sample-app files specified in §4 (`package.json`, `package-lock.json`, `astro.config.mjs`, `tsconfig.json`, `src/pages/index.astro`, `.gitignore`) MAY be committed.
+- [ ] The workflow files specified in §8 (`.github/workflows/deploy.yml`, `.github/workflows/ci.yml`, `.github/workflows/_build.yml`, `.github/actions/build-astro/action.yml`) MAY be committed.
+- [ ] A per-branch `README.md` MAY be committed.
+- [ ] All other §12.6.1 bans STILL APPLY: no Terraform, CloudFormation, CDK, shell scripts, or Dockerfiles; no real AWS account IDs, real S3 bucket names beyond `<example-bucket>`, or real IAM role ARNs beyond `arn:aws:iam::<ACCOUNT_ID>:role/<role-name>`; no live AWS provisioning steps in any committed text.
 
 ## 13. Implementation Phases
 

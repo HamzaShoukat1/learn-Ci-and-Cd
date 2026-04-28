@@ -1,7 +1,7 @@
 ---
 project: "fem-cicd-service"
 maturity: "draft"
-last_updated: "2026-04-26"
+last_updated: "2026-04-27"
 updated_by: "@senior-engineer"
 scope: "Master agenda for the Frontend Masters 'Cloud CI/CD with GitHub Actions' workshop. Maps all 16 FEM segments to the three-stage CI/CD progression (POC, Stable, Enterprise) and links each stage-tagged segment to its detailed treatment in POC.md, STABLE.md, or ENTERPRISE.md."
 owner: "@senior-engineer"
@@ -45,6 +45,20 @@ The workshop demonstrates a single `production` environment. Multi-environment p
 - Adds zero load on the AWS topology (still one S3 bucket, one CloudFront distribution).
 
 ENTERPRISE.md authors: do not introduce a staging environment in segment 12's Live build. If a student asks, the answer is "in production you would add a `staging` environment with the same shape; we are skipping it to stay in budget."
+
+## Branch reference
+
+Each stage's completed reference solution lives on a corresponding branch in this repository. Students who fall behind, want to compare against a known-good end-state, or are reading along after the workshop can check out the branch to see the end-of-stage repository state byte-for-byte.
+
+| Stage | Branch | What's on the branch |
+| --- | --- | --- |
+| POC | `poc` | Sample app + `.github/workflows/deploy.yml` (end-of-segment-6 state) |
+| Stable | `stable` | POC content + `.github/actions/build-astro/` composite + `.github/workflows/_build.yml` + `.github/workflows/ci.yml` + modified `deploy.yml` |
+| Enterprise | `enterprise` | Stable content + OIDC trust + SHA-pinned actions + `production` environment + concurrency blocks + CloudFront with OAC |
+
+The branches are linearly related: `poc` is branched from `main`, `stable` from `poc`, `enterprise` from `stable`. As a result, `git diff stable..poc` shows the diff Stable adds on top of POC, and `git diff enterprise..stable` shows the diff Enterprise adds on top of Stable.
+
+For per-stage AWS prerequisites and GitHub settings the instructor must set up by hand before running that stage's workflows, see `README.md` on each branch.
 
 ## Day shape
 
@@ -93,7 +107,7 @@ The instructor verifies every item below before the workshop starts. The recomme
 
 - [ ] A workshop repository is created on GitHub under the demo owner. The instructor has admin rights for branch protection, environment, and OIDC trust setup later in the day.
 - [ ] Repository secrets are empty going into segment 2. `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` will be added during segment 5 or 6 as part of the live demonstration.
-- [ ] A "finished-state" branch exists for each stage (`fallback/poc-final`, `fallback/stable-final`, `fallback/enterprise-final`) holding the workflow files at the end of that stage. These are the failover targets if a live demo runs over time or a step fails. TDD §15.1 backup plan.
+- [ ] A "finished-state" branch exists for each stage (`poc`, `stable`, `enterprise`) holding the workflow files at the end of that stage. These are the failover targets if a live demo runs over time or a step fails. TDD §15.1 backup plan.
 
 ### Local environment and screenshare
 
@@ -184,7 +198,7 @@ The end-of-POC recap closes the stage: a working pipeline that deploys on every 
 
 No teaching content. Students return at 12:45.
 
-The instructor uses the break to (1) verify the segment-8 demo (caching) is staged, (2) confirm the `fallback/poc-final` branch matches what was just built, and (3) drink water.
+The instructor uses the break to (1) verify the segment-8 demo (caching) is staged, (2) confirm the `poc` branch matches what was just built, and (3) drink water.
 
 ---
 

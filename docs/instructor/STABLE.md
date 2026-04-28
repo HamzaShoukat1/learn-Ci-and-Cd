@@ -1,7 +1,7 @@
 ---
 project: "fem-cicd-service"
 maturity: "draft"
-last_updated: "2026-04-26"
+last_updated: "2026-04-27"
 updated_by: "@senior-engineer"
 scope: "Stage 2 (Stable) instructor guide for the Frontend Masters 'Cloud CI/CD with GitHub Actions' workshop. Covers FEM segments 8 through 11: caching and debugging, marketplace and composite actions, reusable workflows, and the composite-vs-reusable-vs-custom comparison. Transforms the POC end-state pipeline into a multi-contributor pipeline with PR validation, npm caching, an extracted composite action, and a reusable workflow."
 owner: "@senior-engineer"
@@ -18,12 +18,20 @@ dependencies:
 
 Stable stage, FEM segments 8–11. Time block: 12:45 to 3:00. By the end of segment 11, the same `dist/` artifact that the POC pipeline shipped is now produced by a multi-contributor pipeline: pull requests trigger a CI workflow that gates merges to `main`, the build sequence is extracted twice (once as a composite action, once as a reusable workflow), and the npm install is cached so successive builds finish in seconds. The deploy target and AWS credentials are unchanged from POC — Stable is a workflow-code maturity stage, not an infrastructure stage. Students leave segment 11 with a pipeline they would not be embarrassed to put in a portfolio.
 
+## Completed reference
+
+The end-of-Stable state described in this document — the `build-astro` composite action (lines 143–186), the `_build.yml` reusable workflow (lines 259–299), the `ci.yml` PR-validation workflow (lines 307–320), and the modified `deploy.yml` that consumes `_build.yml` with caching (lines 326–353) — lives on the `stable` branch of this repository.
+
+The branch progression is linear: `stable` is branched from `poc`, so `git diff stable..poc` shows exactly what segments 8–11 add on top of the POC end-state. See the per-branch `README.md` on the `stable` branch for branch-protection rule configuration and the `ACTIONS_STEP_DEBUG` demo setup used in segment 8.
+
+The `stable` branch does NOT yet include OIDC, SHA-pinning, environments, concurrency, or CloudFront — those land on the `enterprise` branch (segments 12–15) and are out of scope for this stage.
+
 ## Pre-flight
 
 What must already be true at the start of segment 8 (12:45). Most of this is the POC end-state; the rest is staging for the deliberate-failure demo in segment 8 and the branch-protection toggle in segment 10.
 
 - The POC pipeline from segment 6 is green on the last push to `main`. The repo's `.github/workflows/deploy.yml` matches the POC end-state in TDD §8.1 (single workflow, `build` job → `deploy` job via `needs:` and `actions/upload-artifact@v4` / `actions/download-artifact@v4`).
-- `fallback/poc-final` branch is up to date with the POC end-state. It is the failover target if a Stable transformation breaks live.
+- `poc` branch is up to date with the POC end-state. It is the failover target if a Stable transformation breaks live.
 - The instructor has a feature branch ready to push from for the segment-10 PR demo (e.g., `feature/example-pr`). The branch holds a one-line edit to `src/pages/index.astro`'s greeting so the PR has a real diff.
 - Branch-protection settings for `main` are open in a browser tab but **not yet enabled**. Segment 10 turns them on live.
 - A second laptop or personal GitHub account is signed in and ready to demonstrate that direct push to `main` is blocked once protection is enabled. (Optional but recommended; without it the instructor narrates the failure rather than showing it.)

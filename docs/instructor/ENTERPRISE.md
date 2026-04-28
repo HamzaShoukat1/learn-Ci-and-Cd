@@ -1,7 +1,7 @@
 ---
 project: "fem-cicd-service"
 maturity: "draft"
-last_updated: "2026-04-26"
+last_updated: "2026-04-27"
 updated_by: "@senior-engineer"
 scope: "Stage 3 instructor guide for the Frontend Masters 'Cloud CI/CD with GitHub Actions' workshop. Covers FEM segments 12 through 15 and turns the Stable pipeline into one a regulated organization could put in front of a security review: environment-gated deploys, OIDC instead of long-lived AWS keys, CloudFront with Origin Access Control, SHA-pinned actions with minimal permissions, and concurrency controls. Reads against OUTLINE.md and the architecture TDD."
 owner: "@senior-engineer"
@@ -27,6 +27,16 @@ This stage hardens the Stable pipeline (sample app: TDD §4; end-of-Stable repo 
 
 By 4:30 PM students have observed the same `dist/` artifact ride a third pipeline — one they could put in front of a security review.
 
+## Completed reference
+
+The end-of-Enterprise state described in this doc — SHA-pinned actions, OIDC trust, environment-gated deploys, CloudFront with Origin Access Control, deny-all workflow permissions, and concurrency groups — lives on the `enterprise` branch.
+
+`enterprise` is branched from `stable`, so the workshop progression is linear: `git diff enterprise..stable` shows exactly what segments 12–15 transform.
+
+**Important caveat:** the SHA-pinning excerpts on the `enterprise` branch use the literal placeholder string `<40-char-sha>` (see the read-only excerpt later in this doc, segment 14, "Action pinning") — they are NOT real 40-character SHAs. The instructor pins real SHAs at workshop date as part of the dry-run, not pre-commit.
+
+For the supporting AWS-side setup that this branch assumes already exists — OIDC provider, IAM role and trust policy, CloudFront distribution with OAC, and the `production` environment configuration — see `README.md` on the `enterprise` branch.
+
 ## Pre-flight (specific to this stage)
 
 The OUTLINE pre-flight checklist (`OUTLINE.md` → "Pre-flight checklist") is the canonical list. The items below must already be true at the start of segment 12. They are pre-staged outside the workshop because each one would blow the time budget if performed live.
@@ -35,10 +45,10 @@ The OUTLINE pre-flight checklist (`OUTLINE.md` → "Pre-flight checklist") is th
 - The GitHub Actions OIDC provider trust is pre-configured in AWS IAM (the `arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com` resource exists). Creating it live would need an `iam:CreateOpenIDConnectProvider` API call and an audience-and-thumbprint dance that does not teach anything the IAM trust policy does not already teach.
 - A CloudFront distribution exists with the S3 bucket as origin via OAC. It is in `Disabled` state. Segment 13 enables it live. Pre-staging avoids the 10–15 minute distribution-creation propagation that would consume the entire OIDC segment.
 - The S3 bucket policy is currently the public-read policy from POC and Stable. Segment 13 flips it to the OAC-only policy. The replacement bucket-policy text is in the instructor's notes pane.
-- The Stable end-state is committed and green. The `fallback/stable-final` branch matches what is on `main`; the `fallback/enterprise-final` branch is the safety net if any segment 12–15 step runs over time.
+- The Stable end-state is committed and green. The `stable` branch matches what is on `main`; the `enterprise` branch is the safety net if any segment 12–15 step runs over time.
 - Long-lived `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` repository secrets are still present going into segment 12. They are removed live in segment 13 to make the OIDC switch visible — and only *after* a deploy has succeeded via OIDC, so the old auth path is never torn down before the new one is proven working.
 
-If any item above is not true, do not start segment 12 — the OIDC segment will fail and the rest of the stage cascades. Switch to the `fallback/enterprise-final` branch and walk it as a static read.
+If any item above is not true, do not start segment 12 — the OIDC segment will fail and the rest of the stage cascades. Switch to the `enterprise` branch and walk it as a static read.
 
 ## Segment 12 — 3:00 — Environments & Protection Rules
 
