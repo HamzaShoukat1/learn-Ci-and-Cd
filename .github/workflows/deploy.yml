@@ -38,7 +38,7 @@ jobs:
 
       # 3. Create the mock S3 Bucket inside MiniStack
       - name: Create Local S3 Bucket
-        run: aws --endpoint-url=http://localhost:4566 s3 mb s3://my-course-bucket
+        run: aws --endpoint-url=http://localhost:4566 s3 mb s3://pipelines
         env:
           AWS_ACCESS_KEY_ID: test
           AWS_SECRET_ACCESS_KEY: test
@@ -46,7 +46,8 @@ jobs:
 
       # 4. Deploy your frontend to the local MiniStack bucket
       - name: Sync Frontend to MiniStack S3
-        run: aws --endpoint-url=http://localhost:4566 s3 sync dist/ s3://my-course-bucket/ --delete
+        run: aws --endpoint-url=http://localhost:4566 s3 sync dist/ s3://pipelines/ --delete --checksum-algorithm SHA256
+        
 
         env:
           AWS_ACCESS_KEY_ID: test
@@ -55,7 +56,7 @@ jobs:
 
       # 5. Optional: Verify upload by printing bucket contents to logs
       - name: Verify MiniStack Deployment
-        run: aws --endpoint-url=http://localhost:4566 s3 ls s3://my-course-bucket/
+        run: aws --endpoint-url=http://localhost:4566 s3 ls s3://pipelines/
         env:
           AWS_ACCESS_KEY_ID: test
           AWS_SECRET_ACCESS_KEY: test
