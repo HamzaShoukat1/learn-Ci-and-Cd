@@ -8,9 +8,9 @@ on:
   workflow_call:
     inputs:
       node-version:
-        description: Node.js version (e.g. `26.3.0`) to use for the build.
+        description: Node.js version (e.g. `22.22`) to use for the build.
         required: false
-        default: '26.3.0'
+        default: '22.22'
         type: string
       artifact-name:
         description: Name of the uploaded artifact.
