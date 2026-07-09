@@ -47,6 +47,7 @@ jobs:
       # 4. Deploy your frontend to the local MiniStack bucket
       - name: Sync Frontend to MiniStack S3
         run: aws --endpoint-url=http://localhost:4566 s3 sync dist/ s3://my-course-bucket/ --delete
+
         env:
           AWS_ACCESS_KEY_ID: test
           AWS_SECRET_ACCESS_KEY: test
